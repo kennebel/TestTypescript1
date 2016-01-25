@@ -6,6 +6,10 @@ window.onload = () => {
     animateScene();
 };
 
+window.onresize = (event) => {
+    root.windowResize();
+}
+
 function animateScene() {
     root.animateScene();
     requestAnimationFrame(animateScene); 

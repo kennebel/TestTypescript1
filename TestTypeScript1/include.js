@@ -1,3 +1,14 @@
+/// <reference path="../Root/Root.ts" />
+var SimObject = (function () {
+    // Constuct / Destruct
+    function SimObject(newRoot) {
+        this.root = newRoot;
+    }
+    // Methods
+    SimObject.prototype.update = function () {
+    };
+    return SimObject;
+})();
 /// <reference path="../DefinitelyTyped/three.d.ts" />
 /// <reference path="../Objects/SimObject.ts" />
 var ObjectManager = (function () {
@@ -21,11 +32,7 @@ var Root = (function () {
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         // Set the background color of the renderer to black, with full opacity 
         this.renderer.setClearColor(0x000000, 1);
-        // Get the size of the inner window (content area) to create a full size renderer 
-        this.canvasWidth = window.innerWidth;
-        this.canvasHeight = window.innerHeight;
-        // Set the renderers size to the content areas size 
-        this.renderer.setSize(this.canvasWidth, this.canvasHeight);
+        this.windowResize();
         // Get the DIV element from the HTML document by its ID and append the renderers DOM 
         // object to it 
         document.getElementById("WebGLCanvas").appendChild(this.renderer.domElement);
@@ -117,6 +124,17 @@ var Root = (function () {
         this.mesh2.position.set(1.5, 0.0, 4.0);
         this.scene.add(this.mesh2);
     };
+    Root.prototype.windowResize = function () {
+        // Get the size of the inner window (content area) to create a full size renderer 
+        this.canvasWidth = window.innerWidth;
+        this.canvasHeight = window.innerHeight;
+        // Set the renderers size to the content areas size 
+        this.renderer.setSize(this.canvasWidth, this.canvasHeight);
+        if (this.camera != null) {
+            this.camera.aspect = this.canvasWidth / this.canvasHeight;
+            this.camera.updateProjectionMatrix();
+        }
+    };
     Root.prototype.animateScene = function () {
         this.objMgr.update();
         // Increase the y rotation of the triangle 
@@ -131,22 +149,14 @@ var Root = (function () {
     };
     return Root;
 })();
-/// <reference path="../Root/Root.ts" />
-var SimObject = (function () {
-    // Constuct / Destruct
-    function SimObject(newRoot) {
-        this.root = newRoot;
-    }
-    // Methods
-    SimObject.prototype.update = function () {
-    };
-    return SimObject;
-})();
 /// <reference path="Root/Root.ts" />
 var root = new Root();
 window.onload = function () {
     root.initializeScene();
     animateScene();
+};
+window.onresize = function (event) {
+    root.windowResize();
 };
 function animateScene() {
     root.animateScene();

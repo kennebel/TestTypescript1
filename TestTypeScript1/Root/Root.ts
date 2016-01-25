@@ -20,13 +20,8 @@ class Root {
  
         // Set the background color of the renderer to black, with full opacity 
         this.renderer.setClearColor(0x000000, 1); 
- 
-        // Get the size of the inner window (content area) to create a full size renderer 
-        this.canvasWidth = window.innerWidth;
-        this.canvasHeight = window.innerHeight; 
- 
-        // Set the renderers size to the content areas size 
-        this.renderer.setSize(this.canvasWidth, this.canvasHeight); 
+
+        this.windowResize();
  
         // Get the DIV element from the HTML document by its ID and append the renderers DOM 
         // object to it 
@@ -130,7 +125,22 @@ class Root {
         // by 1.5 on the x axis and by 4 on the z axis and add the mesh to the scene. 
         this.mesh2 = new THREE.Mesh(boxGeometry, boxMaterial);
         this.mesh2.position.set(1.5, 0.0, 4.0);
-        this.scene.add(this.mesh2);     }
+        this.scene.add(this.mesh2);
+    }
+
+    windowResize() {
+        // Get the size of the inner window (content area) to create a full size renderer 
+        this.canvasWidth = window.innerWidth;
+        this.canvasHeight = window.innerHeight; 
+
+        // Set the renderers size to the content areas size 
+        this.renderer.setSize(this.canvasWidth, this.canvasHeight); 
+
+        if (this.camera != null) {
+            this.camera.aspect = this.canvasWidth / this.canvasHeight;
+            this.camera.updateProjectionMatrix();
+        }
+    }
 
     animateScene() {
         this.objMgr.update();

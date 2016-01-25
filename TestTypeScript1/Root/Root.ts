@@ -9,8 +9,8 @@ class Root {
     canvasWidth: number;
     canvasHeight: number;
 
-    mesh1: THREE.Mesh;
-    mesh2: THREE.Mesh;
+    //mesh1: THREE.Mesh;
+    //mesh2: THREE.Mesh;
 
     objMgr: ObjectManager;
 
@@ -51,81 +51,82 @@ class Root {
         // the scene. 
         // After definition, the camera has to be added to the scene. 
         this.camera = new THREE.PerspectiveCamera(45, this.canvasWidth / this.canvasHeight, 1, 100);
-        this.camera.position.set(0, 0, 10);
-        this.camera.lookAt(this.scene.position);
+        this.camera.position.set(0, 10, 10);
+        this.camera.lookAt(new THREE.Vector3(0, 0, 0));
         this.scene.add(this.camera); 
 
-        this.objMgr = new ObjectManager();
+        this.objMgr = new ObjectManager(this);
+        this.objMgr.testInit();
  
-        var pyramidGeometry = new THREE.CylinderGeometry(0, 1.5, 1.5, 4, 1, false);
+        //var pyramidGeometry = new THREE.CylinderGeometry(0, 1.5, 1.5, 4, 1, false);
  
-        // Coloring the faces with vertex colors is a bit tricky, but allows us to see how to 
-        // loop through the faces and check whether they have three or four vertices. 
-        // With a simple 'for'-loop we run through all faces, which are accessed by their index.
-        // The 'instanceof' operator gives the possibility to check, whether the current face is 
-        // a THREE.Face4 or THREE.Face3. Depending on its object type, we set three or four 
-        // vertex colors. For THREE.Face4 we switch the colors of vertex 1 and 2 for every 
-        // second face because we want the lower vertices having the same colors as the 
-        // neighbour face. Vertex 0 and 3 are the upper vertices, which are always red. 
-        // If WebGL isn't supported and the canvas renderer is used, it ignores the vertex 
-        // colors. They are only supported by the WebGL renderer (current release of 
-        // Three.js: 49). 
-        for (var i = 0; i < pyramidGeometry.faces.length; i++) {
-            pyramidGeometry.faces[i].vertexColors[0] = new THREE.Color(0xFF0000);
-            pyramidGeometry.faces[i].vertexColors[1] = new THREE.Color(0x00FF00);
-            pyramidGeometry.faces[i].vertexColors[2] = new THREE.Color(0x0000FF);
-        } 
+        //// Coloring the faces with vertex colors is a bit tricky, but allows us to see how to 
+        //// loop through the faces and check whether they have three or four vertices. 
+        //// With a simple 'for'-loop we run through all faces, which are accessed by their index.
+        //// The 'instanceof' operator gives the possibility to check, whether the current face is 
+        //// a THREE.Face4 or THREE.Face3. Depending on its object type, we set three or four 
+        //// vertex colors. For THREE.Face4 we switch the colors of vertex 1 and 2 for every 
+        //// second face because we want the lower vertices having the same colors as the 
+        //// neighbour face. Vertex 0 and 3 are the upper vertices, which are always red. 
+        //// If WebGL isn't supported and the canvas renderer is used, it ignores the vertex 
+        //// colors. They are only supported by the WebGL renderer (current release of 
+        //// Three.js: 49). 
+        //for (var i = 0; i < pyramidGeometry.faces.length; i++) {
+        //    pyramidGeometry.faces[i].vertexColors[0] = new THREE.Color(0xFF0000);
+        //    pyramidGeometry.faces[i].vertexColors[1] = new THREE.Color(0x00FF00);
+        //    pyramidGeometry.faces[i].vertexColors[2] = new THREE.Color(0x0000FF);
+        //} 
  
-        // To activate the vertex color, we have to set 'vertexColors' attribute to 
-        // 'THREE.VertexColors'. Otherwise they won't be displayed. 
+        //// To activate the vertex color, we have to set 'vertexColors' attribute to 
+        //// 'THREE.VertexColors'. Otherwise they won't be displayed. 
  
-        // Create a basic material, supporting vertex colors. Activate the 'doubleSided' 
-        // attribute to force the rendering of both sides of each face (front and back). 
-        // This prevents the so called 'backface culling'. Usually, only the side is 
-        // rendered, whose normal vector points towards the camera. The other side is not 
-        // rendered (backface culling). But this performance optimization sometimes leads 
-        // to wholes in the surface. When this happens in your surface, simply set 
-        // 'doubleSided' to 'true'. 
-        var pyramidMaterial = new THREE.MeshBasicMaterial({
-            vertexColors: THREE.VertexColors,
-            side: THREE.DoubleSide
-        }); 
+        //// Create a basic material, supporting vertex colors. Activate the 'doubleSided' 
+        //// attribute to force the rendering of both sides of each face (front and back). 
+        //// This prevents the so called 'backface culling'. Usually, only the side is 
+        //// rendered, whose normal vector points towards the camera. The other side is not 
+        //// rendered (backface culling). But this performance optimization sometimes leads 
+        //// to wholes in the surface. When this happens in your surface, simply set 
+        //// 'doubleSided' to 'true'. 
+        //var pyramidMaterial = new THREE.MeshBasicMaterial({
+        //    vertexColors: THREE.VertexColors,
+        //    side: THREE.DoubleSide
+        //}); 
  
-        // Create a mesh and insert the geometry and the material. Translate the whole mesh 
-        // by -1.5 on the x axis and by 4 on the z axis. Finally add the mesh to the scene. 
-        this.mesh1 = new THREE.Mesh(pyramidGeometry, pyramidMaterial);
-        this.mesh1.position.set(-1.5, 0.0, 4.0);
-        this.scene.add(this.mesh1); 
+        //// Create a mesh and insert the geometry and the material. Translate the whole mesh 
+        //// by -1.5 on the x axis and by 4 on the z axis. Finally add the mesh to the scene. 
+        //this.mesh1 = new THREE.Mesh(pyramidGeometry, pyramidMaterial);
+        //this.mesh1.position.set(-1.5, 0.0, 4.0);
+        //this.scene.add(this.mesh1); 
  
-        // Create the cube 
-        // Parameter 1: Width 
-        // Parameter 2: Height 
-        // Parameter 3: Depth 
-        var boxGeometry = new THREE.BoxGeometry(1.5, 1.5, 1.5); 
+        //// Create the cube 
+        //// Parameter 1: Width 
+        //// Parameter 2: Height 
+        //// Parameter 3: Depth 
+        //var boxGeometry = new THREE.BoxGeometry(1.5, 1.5, 1.5); 
  
-        // Applying different materials to the faces is a more difficult than applying one 
-        // material to the whole geometry. We start with creating an array of 
-        // THREE.MeshBasicMaterial. 
+        //// Applying different materials to the faces is a more difficult than applying one 
+        //// material to the whole geometry. We start with creating an array of 
+        //// THREE.MeshBasicMaterial. 
  
-        // Define six colored materials 
-        var boxMaterials = [
-            new THREE.MeshBasicMaterial({ color: 0xFF0000 }),
-            new THREE.MeshBasicMaterial({ color: 0x00FF00 }),
-            new THREE.MeshBasicMaterial({ color: 0x0000FF }),
-            new THREE.MeshBasicMaterial({ color: 0xFFFF00 }),
-            new THREE.MeshBasicMaterial({ color: 0x00FFFF }),
-            new THREE.MeshBasicMaterial({ color: 0xFFFFFF })
-        ]; 
+        //// Define six colored materials 
+        //var boxMaterials = [
+        //    new THREE.MeshBasicMaterial({ color: 0xFF0000 }),
+        //    new THREE.MeshBasicMaterial({ color: 0x00FF00 }),
+        //    new THREE.MeshBasicMaterial({ color: 0x0000FF }),
+        //    new THREE.MeshBasicMaterial({ color: 0xFFFF00 }),
+        //    new THREE.MeshBasicMaterial({ color: 0x00FFFF }),
+        //    new THREE.MeshBasicMaterial({ color: 0xFFFFFF })
+        //]; 
  
-        // Create a MeshFaceMaterial, which allows the cube to have different materials on 
-        // each face 
-        var boxMaterial = new THREE.MeshFaceMaterial(boxMaterials); 
+        //// Create a MeshFaceMaterial, which allows the cube to have different materials on 
+        //// each face 
+        //var boxMaterial = new THREE.MeshFaceMaterial(boxMaterials); 
  
-        // Create a mesh and insert the geometry and the material. Translate the whole mesh 
-        // by 1.5 on the x axis and by 4 on the z axis and add the mesh to the scene. 
-        this.mesh2 = new THREE.Mesh(boxGeometry, boxMaterial);
-        this.mesh2.position.set(1.5, 0.0, 4.0);
-        this.scene.add(this.mesh2);
+        //// Create a mesh and insert the geometry and the material. Translate the whole mesh 
+        //// by 1.5 on the x axis and by 4 on the z axis and add the mesh to the scene. 
+        //this.mesh2 = new THREE.Mesh(boxGeometry, boxMaterial);
+        //this.mesh2.position.set(1.5, 0.0, 4.0);
+        //this.scene.add(this.mesh2);
     }
 
     windowResize() {
@@ -146,10 +147,10 @@ class Root {
         this.objMgr.update();
 
         // Increase the y rotation of the triangle 
-        this.mesh1.rotation.y += 0.01; 
+        //this.mesh1.rotation.y += 0.01; 
  
         // Decrease the rotation of the cube 
-        this.mesh2.rotateOnAxis(new THREE.Vector3(1, 1, 1).normalize(), 0.0075);
+        //this.mesh2.rotateOnAxis(new THREE.Vector3(1, 1, 1).normalize(), 0.0075);
  
         // Map the 3D scene down to the 2D screen (render the frame) 
         this.renderScene();

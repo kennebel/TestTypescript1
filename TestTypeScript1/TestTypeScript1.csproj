@@ -26,11 +26,13 @@
     <Content Include="index.html" />
     <Content Include="js\threejs\three.js" />
     <Content Include="js\threejs\three.min.js" />
+    <Content Include="js\Tween.js" />
     <Content Include="web.config" />
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="app.ts" />
     <TypeScriptCompile Include="DefinitelyTyped\three.d.ts" />
+    <TypeScriptCompile Include="DefinitelyTyped\tween.js.d.ts" />
     <TypeScriptCompile Include="Objects\SimObject.ts" />
     <TypeScriptCompile Include="Objects\TestObject.ts" />
     <TypeScriptCompile Include="Root\ObjectManager.ts" />

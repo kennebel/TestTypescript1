@@ -14,3 +14,7 @@ function animateScene() {
     root.animateScene();
     requestAnimationFrame(animateScene); 
 }
+
+function testClick() {
+    alert("testing");
+}

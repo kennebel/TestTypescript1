@@ -35,6 +35,7 @@
     <TypeScriptCompile Include="DefinitelyTyped\tween.js.d.ts" />
     <TypeScriptCompile Include="Objects\SimObject.ts" />
     <TypeScriptCompile Include="Objects\TestObject.ts" />
+    <TypeScriptCompile Include="Root\InputManager.ts" />
     <TypeScriptCompile Include="Root\ObjectManager.ts" />
     <TypeScriptCompile Include="Root\Root.ts" />
   </ItemGroup>

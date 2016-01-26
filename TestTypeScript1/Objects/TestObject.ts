@@ -20,11 +20,19 @@ class TestObject extends SimObject {
         //    new THREE.MeshBasicMaterial({ color: 0x00FFFF }),
         //    new THREE.MeshBasicMaterial({ color: 0xFFFFFF })
         //];
+        //var boxMaterials = [
+        //    new THREE.MeshBasicMaterial({ color: 0xFF0000 }),
+        //    new THREE.MeshBasicMaterial({ color: 0xFF00FF }),
+        //    new THREE.MeshBasicMaterial({ color: 0xFF0000 }),
+        //    new THREE.MeshBasicMaterial({ color: 0xFF00FF }),
+        //    new THREE.MeshBasicMaterial({ color: 0xFF0000 }),
+        //    new THREE.MeshBasicMaterial({ color: 0xFF00FF })
+        //];
         //var boxMaterial = new THREE.MeshFaceMaterial(boxMaterials);
-        //var boxMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFFFF });
+        var boxMaterial = new THREE.MeshBasicMaterial({ color: 0x0000FF });
  
-        //this.mesh = new THREE.Mesh(boxGeometry, boxMaterial);
-        this.mesh = new THREE.Mesh(boxGeometry);
+        this.mesh = new THREE.Mesh(boxGeometry, boxMaterial);
+        //this.mesh = new THREE.Mesh(boxGeometry);
         this.mesh.position.set(startX, 0.0, 0.0);
         this.root.scene.add(this.mesh);
     }

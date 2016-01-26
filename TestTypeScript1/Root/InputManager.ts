@@ -8,7 +8,7 @@ class InputManager {
     }
 
     keyPressed(event: KeyboardEvent) {
-        console.log(" Pressed: " + event.which);
+        //console.log(" Pressed: " + event.which);
 
         var key: string = this.keyConvert(event);
         if (this.root.keys.indexOf(key) == -1) {
@@ -17,7 +17,7 @@ class InputManager {
     }
 
     keyReleased(event: KeyboardEvent) {
-        console.log("Released: " + event.which);
+        //console.log("Released: " + event.which);
 
         var key: string = this.keyConvert(event);
         var index: number = this.root.keys.indexOf(key);

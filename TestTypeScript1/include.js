@@ -1,18 +1,5 @@
 /// <reference path="../DefinitelyTyped/three.d.ts" />
 /// <reference path="../DefinitelyTyped/tween.js.d.ts" />
-/// <reference path="../Root/Root.ts" />
-var SimObject = (function () {
-    // Constuct / Destruct
-    function SimObject(newRoot) {
-        this.root = newRoot;
-    }
-    // Methods
-    SimObject.prototype.update = function () {
-    };
-    return SimObject;
-})();
-/// <reference path="../DefinitelyTyped/three.d.ts" />
-/// <reference path="../DefinitelyTyped/tween.js.d.ts" />
 /// <reference path="../Objects/SimObject.ts" />
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -77,14 +64,14 @@ var InputManager = (function () {
         this.root = newRoot;
     }
     InputManager.prototype.keyPressed = function (event) {
-        console.log(" Pressed: " + event.which);
+        //console.log(" Pressed: " + event.which);
         var key = this.keyConvert(event);
         if (this.root.keys.indexOf(key) == -1) {
             this.root.keys.push(key);
         }
     };
     InputManager.prototype.keyReleased = function (event) {
-        console.log("Released: " + event.which);
+        //console.log("Released: " + event.which);
         var key = this.keyConvert(event);
         var index = this.root.keys.indexOf(key);
         if (index != -1) {
@@ -170,6 +157,19 @@ var Root = (function () {
         return false;
     };
     return Root;
+})();
+/// <reference path="../DefinitelyTyped/three.d.ts" />
+/// <reference path="../DefinitelyTyped/tween.js.d.ts" />
+/// <reference path="../Root/Root.ts" />
+var SimObject = (function () {
+    // Constuct / Destruct
+    function SimObject(newRoot) {
+        this.root = newRoot;
+    }
+    // Methods
+    SimObject.prototype.update = function () {
+    };
+    return SimObject;
 })();
 /// <reference path="Root/Root.ts" />
 var root = new Root();

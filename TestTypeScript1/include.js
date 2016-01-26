@@ -77,14 +77,14 @@ var InputManager = (function () {
         this.root = newRoot;
     }
     InputManager.prototype.keyPressed = function (event) {
-        //console.log(" Pressed: " + event.which);
+        console.log(" Pressed: " + event.which);
         var key = this.keyConvert(event);
         if (this.root.keys.indexOf(key) == -1) {
             this.root.keys.push(key);
         }
     };
     InputManager.prototype.keyReleased = function (event) {
-        //console.log("Released: " + event.which);
+        console.log("Released: " + event.which);
         var key = this.keyConvert(event);
         var index = this.root.keys.indexOf(key);
         if (index != -1) {
@@ -93,6 +93,15 @@ var InputManager = (function () {
     };
     InputManager.prototype.keyConvert = function (event) {
         switch (event.which) {
+            case 16:
+                return "shift";
+                break;
+            case 17:
+                return "control";
+                break;
+            case 18:
+                return "alt";
+                break;
             case 37:
                 return "left";
                 break;
@@ -110,7 +119,7 @@ var InputManager = (function () {
 var Root = (function () {
     function Root() {
     }
-    // Using as a base: http://www.johannes-raida.de/tutorials/three.js/tutorial05/tutorial05.htm
+    // Used as a base: http://www.johannes-raida.de/tutorials/three.js/tutorial05/tutorial05.htm
     Root.prototype.initializeScene = function () {
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.renderer.setClearColor(0x000000, 1);
@@ -137,16 +146,28 @@ var Root = (function () {
     };
     Root.prototype.animateScene = function () {
         this.objMgr.update();
-        if (this.keys.indexOf("left") > -1) {
-            this.camera.position.x += -1;
+        var step = 0.1;
+        if (this.keyActive("shift")) {
+            step = 1;
         }
-        else if (this.keys.indexOf("right") > -1) {
-            this.camera.position.x += 1;
+        if (this.keyActive("left")) {
+            this.camera.position.x -= step;
+            ;
+        }
+        else if (this.keyActive("right")) {
+            this.camera.position.x += step;
         }
         this.renderScene();
     };
     Root.prototype.renderScene = function () {
         this.renderer.render(this.scene, this.camera);
+    };
+    // Support
+    Root.prototype.keyActive = function (checkFor) {
+        if (this.keys.indexOf(checkFor) > -1) {
+            return true;
+        }
+        return false;
     };
     return Root;
 })();

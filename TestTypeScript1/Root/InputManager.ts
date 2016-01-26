@@ -8,7 +8,7 @@ class InputManager {
     }
 
     keyPressed(event: KeyboardEvent) {
-        //console.log(" Pressed: " + event.which);
+        console.log(" Pressed: " + event.which);
 
         var key: string = this.keyConvert(event);
         if (this.root.keys.indexOf(key) == -1) {
@@ -17,7 +17,7 @@ class InputManager {
     }
 
     keyReleased(event: KeyboardEvent) {
-        //console.log("Released: " + event.which);
+        console.log("Released: " + event.which);
 
         var key: string = this.keyConvert(event);
         var index: number = this.root.keys.indexOf(key);
@@ -28,6 +28,9 @@ class InputManager {
 
     keyConvert(event: KeyboardEvent): string {
         switch (event.which) {
+            case 16: return "shift"; break;
+            case 17: return "control"; break;
+            case 18: return "alt"; break;
             case 37: return "left"; break;
             case 39: return "right"; break;
         }

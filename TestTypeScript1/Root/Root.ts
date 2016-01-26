@@ -10,14 +10,11 @@ class Root {
     canvasWidth: number;
     canvasHeight: number;
 
-    //mesh1: THREE.Mesh;
-    //mesh2: THREE.Mesh;
-
     objMgr: ObjectManager;
     inpMgr: InputManager;
     keys: string[];
 
-    // Using as a base: http://www.johannes-raida.de/tutorials/three.js/tutorial05/tutorial05.htm
+    // Used as a base: http://www.johannes-raida.de/tutorials/three.js/tutorial05/tutorial05.htm
     initializeScene() {
         this.renderer = new THREE.WebGLRenderer({ antialias: true }); 
  
@@ -56,11 +53,16 @@ class Root {
     animateScene() {
         this.objMgr.update();
 
-        if (this.keys.indexOf("left") > -1) {
-            this.camera.position.x += -1;
+        var step: number = 0.1;
+        if (this.keyActive("shift")) {
+            step = 1;
         }
-        else if (this.keys.indexOf("right") > -1) {
-            this.camera.position.x += 1;
+
+        if (this.keyActive("left")) {
+            this.camera.position.x -= step;;
+        }
+        else if (this.keyActive("right")) {
+            this.camera.position.x += step;
         }
 
         this.renderScene();
@@ -68,5 +70,13 @@ class Root {
 
     renderScene() {
         this.renderer.render(this.scene, this.camera);
+    }
+
+    // Support
+    keyActive(checkFor: string): boolean {
+        if (this.keys.indexOf(checkFor) > -1) {
+            return true;
+        }
+        return false;
     }
 }

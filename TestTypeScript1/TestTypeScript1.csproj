@@ -35,7 +35,9 @@
     <TypeScriptCompile Include="DefinitelyTyped\tween.js.d.ts" />
     <TypeScriptCompile Include="Objects\SimObject.ts" />
     <TypeScriptCompile Include="Objects\TestObject.ts" />
+    <TypeScriptCompile Include="Root\Includes.ts" />
     <TypeScriptCompile Include="Root\InputManager.ts" />
+    <TypeScriptCompile Include="Root\IRoot.ts" />
     <TypeScriptCompile Include="Root\ObjectManager.ts" />
     <TypeScriptCompile Include="Root\Root.ts" />
     <TypeScriptCompile Include="Root\TriggerEvent.ts" />

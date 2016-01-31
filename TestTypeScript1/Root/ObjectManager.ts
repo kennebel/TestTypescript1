@@ -1,15 +1,12 @@
-﻿/// <reference path="../DefinitelyTyped/three.d.ts" />
-/// <reference path="../Objects/SimObject.ts" />
-/// <reference path="../Objects/TestObject.ts" />
+﻿/// <reference path="../Root/Includes.ts" />
 
 class ObjectManager {
     // Properties
-    //objects: SimObject[];
-    objects: TestObject[];
-    root: Root;
+    root: IRoot;
+    objects: SimObject[];
 
     // Construct / Destruct
-    constructor(newRoot: Root) {
+    constructor(newRoot: IRoot) {
         this.root = newRoot;
 
         this.objects = new Array();
@@ -24,7 +21,18 @@ class ObjectManager {
 
     testInit() {
         for (var i = -5; i <= 5; i += 2) {
-            this.objects.push(new TestObject(this.root, i));
+            this.add(new TestObject(this.root, i));
+        }
+    }
+
+    add(toAdd: SimObject): void {
+        this.objects.push(toAdd);
+    }
+
+    remove(toRemove: SimObject): void {
+        var index: number = this.objects.indexOf(toRemove);
+        if (index != -1) {
+            this.objects.splice(index, 1);
         }
     }
 }

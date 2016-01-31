@@ -1,8 +1,9 @@
 ﻿/// <reference path="../DefinitelyTyped/three.d.ts" />
+/// <reference path="IRoot.ts" />
 /// <reference path="ObjectManager.ts" />
 /// <reference path="InputManager.ts" />
 
-class Root {
+class Root implements IRoot {
     /// Properties
     renderer: THREE.WebGLRenderer;
     scene: THREE.Scene;
@@ -40,12 +41,10 @@ class Root {
 
         this.keys = new Array();
         this.inpMgr = new InputManager(this);
-
-        this.inpMgr.KeyDown.on(keyDown);
     }
 
     destructor() {
-        this.inpMgr.KeyDown.off(keyDown);
+        
     }
 
     /// Methods
@@ -72,7 +71,6 @@ class Root {
         this.renderer.render(this.scene, this.camera);
     }
 
-    /// Support
     keyActive(checkFor: string): boolean {
         if (this.keys.indexOf(checkFor) > -1) {
             return true;
@@ -80,6 +78,28 @@ class Root {
         return false;
     }
 
+    keyDown(pressed: string): void {
+        switch (pressed) {
+            case "r":
+                this.resetCamera();
+                break;
+        }
+    }
+
+    keyUp(pressed: string): void {
+    }
+
+    addSimObject(toAdd: SimObject): void {
+        this.objMgr.add(toAdd);
+        this.scene.add(toAdd.mesh);
+    }
+
+    removeSimObject(toRemove: SimObject): void {
+        this.objMgr.remove(toRemove);
+        this.scene.remove(toRemove.mesh);
+    }
+
+    /// Support
     resetCamera(): void {
         this.camera.position.set(this.camDefaultPos[0], this.camDefaultPos[1], this.camDefaultPos[2]);
         this.camera.lookAt(new THREE.Vector3(0, 0, 0));
@@ -103,13 +123,5 @@ class Root {
         else if (this.keyActive("down")) {
             this.camera.position.z += step;
         }
-    }
-}
-
-function keyDown(pressed: string) {
-    switch (pressed) {
-        case "r":
-            root.resetCamera();
-            break;
     }
 }

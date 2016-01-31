@@ -1,13 +1,11 @@
-﻿/// <reference path="../DefinitelyTyped/three.d.ts" />
-/// <reference path="../DefinitelyTyped/tween.js.d.ts" />
-/// <reference path="../Objects/SimObject.ts" />
+﻿/// <reference path="../Root/Includes.ts" />
 
 class TestObject extends SimObject {
     // Properties
     heightUpdater: TWEEN.Tween;
 
     // Construct / Destruct
-    constructor(root: Root, startX: number) {
+    constructor(root: IRoot, startX: number) {
         super(root);
 
         var boxGeometry = new THREE.BoxGeometry(1, 0.1, 1); 
@@ -34,7 +32,7 @@ class TestObject extends SimObject {
         this.mesh = new THREE.Mesh(boxGeometry, boxMaterial);
         //this.mesh = new THREE.Mesh(boxGeometry);
         this.mesh.position.set(startX, 0.0, 0.0);
-        this.root.scene.add(this.mesh);
+        this.addMe();
     }
 
     // Methods

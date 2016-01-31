@@ -1,118 +1,15 @@
-/// <reference path="../DefinitelyTyped/three.d.ts" />
-/// <reference path="../DefinitelyTyped/tween.js.d.ts" />
-/// <reference path="../Root/Root.ts" />
-var SimObject = (function () {
-    // Constuct / Destruct
-    function SimObject(newRoot) {
-        this.root = newRoot;
-    }
-    // Methods
-    SimObject.prototype.update = function () {
-    };
-    return SimObject;
-})();
-/// <reference path="../DefinitelyTyped/three.d.ts" />
-/// <reference path="../DefinitelyTyped/tween.js.d.ts" />
-/// <reference path="../Objects/SimObject.ts" />
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
-var TestObject = (function (_super) {
-    __extends(TestObject, _super);
-    // Construct / Destruct
-    function TestObject(root, startX) {
-        _super.call(this, root);
-        var boxGeometry = new THREE.BoxGeometry(1, 0.1, 1);
-        //var boxMaterials = [
-        //    new THREE.MeshBasicMaterial({ color: 0xFF0000 }),
-        //    new THREE.MeshBasicMaterial({ color: 0x00FF00 }),
-        //    new THREE.MeshBasicMaterial({ color: 0x0000FF }),
-        //    new THREE.MeshBasicMaterial({ color: 0xFFFF00 }),
-        //    new THREE.MeshBasicMaterial({ color: 0x00FFFF }),
-        //    new THREE.MeshBasicMaterial({ color: 0xFFFFFF })
-        //];
-        //var boxMaterials = [
-        //    new THREE.MeshBasicMaterial({ color: 0xFF0000 }),
-        //    new THREE.MeshBasicMaterial({ color: 0xFF00FF }),
-        //    new THREE.MeshBasicMaterial({ color: 0xFF0000 }),
-        //    new THREE.MeshBasicMaterial({ color: 0xFF00FF }),
-        //    new THREE.MeshBasicMaterial({ color: 0xFF0000 }),
-        //    new THREE.MeshBasicMaterial({ color: 0xFF00FF })
-        //];
-        //var boxMaterial = new THREE.MeshFaceMaterial(boxMaterials);
-        var boxMaterial = new THREE.MeshBasicMaterial({ color: 0x0000FF });
-        this.mesh = new THREE.Mesh(boxGeometry, boxMaterial);
-        //this.mesh = new THREE.Mesh(boxGeometry);
-        this.mesh.position.set(startX, 0.0, 0.0);
-        this.root.scene.add(this.mesh);
-    }
-    return TestObject;
-})(SimObject);
-/// <reference path="../DefinitelyTyped/three.d.ts" />
-/// <reference path="../Objects/SimObject.ts" />
-/// <reference path="../Objects/TestObject.ts" />
-var ObjectManager = (function () {
-    // Construct / Destruct
-    function ObjectManager(newRoot) {
-        this.root = newRoot;
-        this.objects = new Array();
-    }
-    // Methods
-    ObjectManager.prototype.update = function () {
-        for (var i = 0; i < this.objects.length; i++) {
-            this.objects[i].update();
-        }
-    };
-    ObjectManager.prototype.testInit = function () {
-        for (var i = -5; i <= 5; i += 2) {
-            this.objects.push(new TestObject(this.root, i));
-        }
-    };
-    return ObjectManager;
-})();
-/// <see cref="http://stackoverflow.com/a/14657922/2577071">
-var TriggerEvent = (function () {
-    function TriggerEvent() {
-        this.handlers = [];
-    }
-    TriggerEvent.prototype.on = function (handler) {
-        this.handlers.push(handler);
-    };
-    TriggerEvent.prototype.off = function (handler) {
-        this.handlers = this.handlers.filter(function (h) { return h !== handler; });
-    };
-    TriggerEvent.prototype.trigger = function (data) {
-        this.handlers.slice(0).forEach(function (h) { return h(data); });
-    };
-    return TriggerEvent;
-})();
-/// <reference path="TriggerEvent.ts" />
+/// <reference path="Includes.ts" />
 var InputManager = (function () {
     function InputManager(newRoot) {
-        this.onKeyDown = new TriggerEvent();
-        this.onKeyUp = new TriggerEvent();
         this.root = newRoot;
     }
-    Object.defineProperty(InputManager.prototype, "KeyDown", {
-        // Exposed Events
-        get: function () { return this.onKeyDown; },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(InputManager.prototype, "KeyUp", {
-        get: function () { return this.onKeyUp; },
-        enumerable: true,
-        configurable: true
-    });
     // Event Handlers
     InputManager.prototype.keyPressed = function (event) {
         //console.log(" Pressed: " + event.which);
         var key = this.keyConvert(event);
         if (this.root.keys.indexOf(key) == -1) {
             this.root.keys.push(key);
-            this.onKeyDown.trigger(key);
+            this.root.keyDown(key);
         }
     };
     InputManager.prototype.keyReleased = function (event) {
@@ -121,7 +18,7 @@ var InputManager = (function () {
         var index = this.root.keys.indexOf(key);
         if (index != -1) {
             this.root.keys.splice(index, 1);
-            this.onKeyUp.trigger(key);
+            this.root.keyUp(key);
         }
     };
     InputManager.prototype.keyConvert = function (event) {
@@ -155,7 +52,99 @@ var InputManager = (function () {
     };
     return InputManager;
 })();
+/// <reference path="../Root/Includes.ts" />
+var SimObject = (function () {
+    // Constuct / Destruct
+    function SimObject(newRoot) {
+        this.root = newRoot;
+    }
+    // Methods
+    SimObject.prototype.update = function () {
+    };
+    SimObject.prototype.addMe = function () {
+        this.root.addSimObject(this);
+    };
+    SimObject.prototype.removeMe = function () {
+        this.root.removeSimObject(this);
+    };
+    return SimObject;
+})();
+/// <reference path="../Root/Includes.ts" />
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
+var TestObject = (function (_super) {
+    __extends(TestObject, _super);
+    // Construct / Destruct
+    function TestObject(root, startX) {
+        _super.call(this, root);
+        var boxGeometry = new THREE.BoxGeometry(1, 0.1, 1);
+        //var boxMaterials = [
+        //    new THREE.MeshBasicMaterial({ color: 0xFF0000 }),
+        //    new THREE.MeshBasicMaterial({ color: 0x00FF00 }),
+        //    new THREE.MeshBasicMaterial({ color: 0x0000FF }),
+        //    new THREE.MeshBasicMaterial({ color: 0xFFFF00 }),
+        //    new THREE.MeshBasicMaterial({ color: 0x00FFFF }),
+        //    new THREE.MeshBasicMaterial({ color: 0xFFFFFF })
+        //];
+        //var boxMaterials = [
+        //    new THREE.MeshBasicMaterial({ color: 0xFF0000 }),
+        //    new THREE.MeshBasicMaterial({ color: 0xFF00FF }),
+        //    new THREE.MeshBasicMaterial({ color: 0xFF0000 }),
+        //    new THREE.MeshBasicMaterial({ color: 0xFF00FF }),
+        //    new THREE.MeshBasicMaterial({ color: 0xFF0000 }),
+        //    new THREE.MeshBasicMaterial({ color: 0xFF00FF })
+        //];
+        //var boxMaterial = new THREE.MeshFaceMaterial(boxMaterials);
+        var boxMaterial = new THREE.MeshBasicMaterial({ color: 0x0000FF });
+        this.mesh = new THREE.Mesh(boxGeometry, boxMaterial);
+        //this.mesh = new THREE.Mesh(boxGeometry);
+        this.mesh.position.set(startX, 0.0, 0.0);
+        this.addMe();
+    }
+    return TestObject;
+})(SimObject);
 /// <reference path="../DefinitelyTyped/three.d.ts" />
+/// <reference path="../DefinitelyTyped/tween.js.d.ts" />
+/// <reference path="../Root/IRoot.ts" />
+/// <reference path="../Root/Root.ts" />
+/// <reference path="../Root/InputManager.ts" />
+/// <reference path="../Root/ObjectManager.ts" />
+/// <reference path="../Objects/SimObject.ts" />
+/// <reference path="../Objects/TestObject.ts" />
+/// <reference path="../Root/Includes.ts" />
+var ObjectManager = (function () {
+    // Construct / Destruct
+    function ObjectManager(newRoot) {
+        this.root = newRoot;
+        this.objects = new Array();
+    }
+    // Methods
+    ObjectManager.prototype.update = function () {
+        for (var i = 0; i < this.objects.length; i++) {
+            this.objects[i].update();
+        }
+    };
+    ObjectManager.prototype.testInit = function () {
+        for (var i = -5; i <= 5; i += 2) {
+            this.add(new TestObject(this.root, i));
+        }
+    };
+    ObjectManager.prototype.add = function (toAdd) {
+        this.objects.push(toAdd);
+    };
+    ObjectManager.prototype.remove = function (toRemove) {
+        var index = this.objects.indexOf(toRemove);
+        if (index != -1) {
+            this.objects.splice(index, 1);
+        }
+    };
+    return ObjectManager;
+})();
+/// <reference path="../DefinitelyTyped/three.d.ts" />
+/// <reference path="IRoot.ts" />
 /// <reference path="ObjectManager.ts" />
 /// <reference path="InputManager.ts" />
 var Root = (function () {
@@ -175,10 +164,8 @@ var Root = (function () {
         this.objMgr.testInit();
         this.keys = new Array();
         this.inpMgr = new InputManager(this);
-        this.inpMgr.KeyDown.on(keyDown);
     }
     Root.prototype.destructor = function () {
-        this.inpMgr.KeyDown.off(keyDown);
     };
     /// Methods
     Root.prototype.windowResize = function () {
@@ -198,13 +185,30 @@ var Root = (function () {
     Root.prototype.renderScene = function () {
         this.renderer.render(this.scene, this.camera);
     };
-    /// Support
     Root.prototype.keyActive = function (checkFor) {
         if (this.keys.indexOf(checkFor) > -1) {
             return true;
         }
         return false;
     };
+    Root.prototype.keyDown = function (pressed) {
+        switch (pressed) {
+            case "r":
+                this.resetCamera();
+                break;
+        }
+    };
+    Root.prototype.keyUp = function (pressed) {
+    };
+    Root.prototype.addSimObject = function (toAdd) {
+        this.objMgr.add(toAdd);
+        this.scene.add(toAdd.mesh);
+    };
+    Root.prototype.removeSimObject = function (toRemove) {
+        this.objMgr.remove(toRemove);
+        this.scene.remove(toRemove.mesh);
+    };
+    /// Support
     Root.prototype.resetCamera = function () {
         this.camera.position.set(this.camDefaultPos[0], this.camDefaultPos[1], this.camDefaultPos[2]);
         this.camera.lookAt(new THREE.Vector3(0, 0, 0));
@@ -230,13 +234,6 @@ var Root = (function () {
     };
     return Root;
 })();
-function keyDown(pressed) {
-    switch (pressed) {
-        case "r":
-            root.resetCamera();
-            break;
-    }
-}
 /// <reference path="Root/Root.ts" />
 var root;
 window.onload = function () {
@@ -255,4 +252,21 @@ function animateScene() {
 function testClick() {
     alert("testing");
 }
+//interface ITriggerEvent<T> {
+//    on(handler: { (data?: T): void });
+//    off(handler: { (data?: T): void });
+//}
+///// <see cref="http://stackoverflow.com/a/14657922/2577071">
+//class TriggerEvent<T> implements ITriggerEvent<T> {
+//    private handlers: { (data?: T): void; }[] = [];
+//    public on(handler: { (data?: T): void }) {
+//        this.handlers.push(handler);
+//    }
+//    public off(handler: { (data?: T): void }) {
+//        this.handlers = this.handlers.filter(h => h !== handler);
+//    }
+//    public trigger(data?: T) {
+//        this.handlers.slice(0).forEach(h => h(data));
+//    }
+//} 
 //# sourceMappingURL=include.js.map

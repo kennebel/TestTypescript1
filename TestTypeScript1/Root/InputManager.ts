@@ -1,19 +1,12 @@
-﻿/// <reference path="TriggerEvent.ts" />
+﻿/// <reference path="Includes.ts" />
 
 class InputManager {
     // Properties
-    root: Root;
+    root: IRoot;
 
-    private onKeyDown = new TriggerEvent<string>();
-    private onKeyUp = new TriggerEvent<string>();
-
-    constructor(newRoot: Root) {
+    constructor(newRoot: IRoot) {
         this.root = newRoot;
     }
-
-    // Exposed Events
-    public get KeyDown(): TriggerEvent<string> { return this.onKeyDown; }
-    public get KeyUp(): TriggerEvent<string> { return this.onKeyUp; }
 
     // Event Handlers
     keyPressed(event: KeyboardEvent) {
@@ -22,7 +15,7 @@ class InputManager {
         var key: string = this.keyConvert(event);
         if (this.root.keys.indexOf(key) == -1) {
             this.root.keys.push(key);
-            this.onKeyDown.trigger(key);
+            this.root.keyDown(key);
         }
     }
 
@@ -33,7 +26,7 @@ class InputManager {
         var index: number = this.root.keys.indexOf(key);
         if (index != -1) {
             this.root.keys.splice(index, 1);
-            this.onKeyUp.trigger(key);
+            this.root.keyUp(key);
         }
     }
 

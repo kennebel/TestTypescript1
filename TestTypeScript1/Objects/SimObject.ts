@@ -1,18 +1,24 @@
-﻿/// <reference path="../DefinitelyTyped/three.d.ts" />
-/// <reference path="../DefinitelyTyped/tween.js.d.ts" />
-/// <reference path="../Root/Root.ts" />
+﻿/// <reference path="../Root/Includes.ts" />
 
 class SimObject {
     // Properties
-    root: Root;
+    root: IRoot;
     mesh: THREE.Mesh;
 
     // Constuct / Destruct
-    constructor(newRoot: Root) {
+    constructor(newRoot: IRoot) {
         this.root = newRoot;
     }
 
     // Methods
     update() {
+    }
+
+    addMe() {
+        this.root.addSimObject(this);
+    }
+
+    removeMe() {
+        this.root.removeSimObject(this);
     }
 }

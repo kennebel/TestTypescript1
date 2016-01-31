@@ -38,6 +38,7 @@
     <TypeScriptCompile Include="Root\InputManager.ts" />
     <TypeScriptCompile Include="Root\ObjectManager.ts" />
     <TypeScriptCompile Include="Root\Root.ts" />
+    <TypeScriptCompile Include="Root\TriggerEvent.ts" />
   </ItemGroup>
   <ItemGroup>
     <None Include="web.Debug.config">

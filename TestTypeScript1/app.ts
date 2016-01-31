@@ -1,8 +1,8 @@
 ﻿/// <reference path="Root/Root.ts" />
 
-var root = new Root();
+var root;
 window.onload = () => {
-    root.initializeScene();
+    root = new Root();
     animateScene();
 };
 

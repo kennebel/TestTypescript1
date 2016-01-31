@@ -1,5 +1,18 @@
 /// <reference path="../DefinitelyTyped/three.d.ts" />
 /// <reference path="../DefinitelyTyped/tween.js.d.ts" />
+/// <reference path="../Root/Root.ts" />
+var SimObject = (function () {
+    // Constuct / Destruct
+    function SimObject(newRoot) {
+        this.root = newRoot;
+    }
+    // Methods
+    SimObject.prototype.update = function () {
+    };
+    return SimObject;
+})();
+/// <reference path="../DefinitelyTyped/three.d.ts" />
+/// <reference path="../DefinitelyTyped/tween.js.d.ts" />
 /// <reference path="../Objects/SimObject.ts" />
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -59,15 +72,47 @@ var ObjectManager = (function () {
     };
     return ObjectManager;
 })();
+/// <see cref="http://stackoverflow.com/a/14657922/2577071">
+var TriggerEvent = (function () {
+    function TriggerEvent() {
+        this.handlers = [];
+    }
+    TriggerEvent.prototype.on = function (handler) {
+        this.handlers.push(handler);
+    };
+    TriggerEvent.prototype.off = function (handler) {
+        this.handlers = this.handlers.filter(function (h) { return h !== handler; });
+    };
+    TriggerEvent.prototype.trigger = function (data) {
+        this.handlers.slice(0).forEach(function (h) { return h(data); });
+    };
+    return TriggerEvent;
+})();
+/// <reference path="TriggerEvent.ts" />
 var InputManager = (function () {
     function InputManager(newRoot) {
+        this.onKeyDown = new TriggerEvent();
+        this.onKeyUp = new TriggerEvent();
         this.root = newRoot;
     }
+    Object.defineProperty(InputManager.prototype, "KeyDown", {
+        // Exposed Events
+        get: function () { return this.onKeyDown; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(InputManager.prototype, "KeyUp", {
+        get: function () { return this.onKeyUp; },
+        enumerable: true,
+        configurable: true
+    });
+    // Event Handlers
     InputManager.prototype.keyPressed = function (event) {
         //console.log(" Pressed: " + event.which);
         var key = this.keyConvert(event);
         if (this.root.keys.indexOf(key) == -1) {
             this.root.keys.push(key);
+            this.onKeyDown.trigger(key);
         }
     };
     InputManager.prototype.keyReleased = function (event) {
@@ -76,6 +121,7 @@ var InputManager = (function () {
         var index = this.root.keys.indexOf(key);
         if (index != -1) {
             this.root.keys.splice(index, 1);
+            this.onKeyUp.trigger(key);
         }
     };
     InputManager.prototype.keyConvert = function (event) {
@@ -92,8 +138,17 @@ var InputManager = (function () {
             case 37:
                 return "left";
                 break;
+            case 38:
+                return "up";
+                break;
             case 39:
                 return "right";
+                break;
+            case 40:
+                return "down";
+                break;
+            case 82:
+                return "r";
                 break;
         }
         return "";
@@ -104,24 +159,28 @@ var InputManager = (function () {
 /// <reference path="ObjectManager.ts" />
 /// <reference path="InputManager.ts" />
 var Root = (function () {
-    function Root() {
-    }
+    /// Construct / Destruct
     // Used as a base: http://www.johannes-raida.de/tutorials/three.js/tutorial05/tutorial05.htm
-    Root.prototype.initializeScene = function () {
+    function Root() {
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.renderer.setClearColor(0x000000, 1);
         this.windowResize();
         document.getElementById("WebGLCanvas").appendChild(this.renderer.domElement);
         this.scene = new THREE.Scene();
+        this.camDefaultPos = [0, 10, 10];
         this.camera = new THREE.PerspectiveCamera(45, this.canvasWidth / this.canvasHeight, 1, 100);
-        this.camera.position.set(0, 10, 10);
-        this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+        this.resetCamera();
         this.scene.add(this.camera);
         this.objMgr = new ObjectManager(this);
         this.objMgr.testInit();
         this.keys = new Array();
         this.inpMgr = new InputManager(this);
+        this.inpMgr.KeyDown.on(keyDown);
+    }
+    Root.prototype.destructor = function () {
+        this.inpMgr.KeyDown.off(keyDown);
     };
+    /// Methods
     Root.prototype.windowResize = function () {
         this.canvasWidth = window.innerWidth;
         this.canvasHeight = window.innerHeight;
@@ -133,6 +192,24 @@ var Root = (function () {
     };
     Root.prototype.animateScene = function () {
         this.objMgr.update();
+        this.update();
+        this.renderScene();
+    };
+    Root.prototype.renderScene = function () {
+        this.renderer.render(this.scene, this.camera);
+    };
+    /// Support
+    Root.prototype.keyActive = function (checkFor) {
+        if (this.keys.indexOf(checkFor) > -1) {
+            return true;
+        }
+        return false;
+    };
+    Root.prototype.resetCamera = function () {
+        this.camera.position.set(this.camDefaultPos[0], this.camDefaultPos[1], this.camDefaultPos[2]);
+        this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+    };
+    Root.prototype.update = function () {
         var step = 0.1;
         if (this.keyActive("shift")) {
             step = 1;
@@ -144,37 +221,26 @@ var Root = (function () {
         else if (this.keyActive("right")) {
             this.camera.position.x += step;
         }
-        this.renderScene();
-    };
-    Root.prototype.renderScene = function () {
-        this.renderer.render(this.scene, this.camera);
-    };
-    // Support
-    Root.prototype.keyActive = function (checkFor) {
-        if (this.keys.indexOf(checkFor) > -1) {
-            return true;
+        if (this.keyActive("up")) {
+            this.camera.position.z -= step;
         }
-        return false;
+        else if (this.keyActive("down")) {
+            this.camera.position.z += step;
+        }
     };
     return Root;
 })();
-/// <reference path="../DefinitelyTyped/three.d.ts" />
-/// <reference path="../DefinitelyTyped/tween.js.d.ts" />
-/// <reference path="../Root/Root.ts" />
-var SimObject = (function () {
-    // Constuct / Destruct
-    function SimObject(newRoot) {
-        this.root = newRoot;
+function keyDown(pressed) {
+    switch (pressed) {
+        case "r":
+            root.resetCamera();
+            break;
     }
-    // Methods
-    SimObject.prototype.update = function () {
-    };
-    return SimObject;
-})();
+}
 /// <reference path="Root/Root.ts" />
-var root = new Root();
+var root;
 window.onload = function () {
-    root.initializeScene();
+    root = new Root();
     animateScene();
 };
 window.onresize = function (event) {

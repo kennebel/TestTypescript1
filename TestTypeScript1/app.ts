@@ -19,5 +19,5 @@ function animateScene() {
 }
 
 function testClick() {
-    alert("testing");
+    console.log("testing");
 }

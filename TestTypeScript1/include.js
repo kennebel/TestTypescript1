@@ -151,10 +151,11 @@ var Root = (function () {
     /// Construct / Destruct
     // Used as a base: http://www.johannes-raida.de/tutorials/three.js/tutorial05/tutorial05.htm
     function Root() {
-        this.renderer = new THREE.WebGLRenderer({ antialias: true });
-        this.renderer.setClearColor(0x000000, 1);
+        this.canvas = document.getElementById("WebGLCanvas");
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        this.renderer.setClearColor(0x000000, 0);
         this.windowResize();
-        document.getElementById("WebGLCanvas").appendChild(this.renderer.domElement);
+        this.canvas.appendChild(this.renderer.domElement);
         this.scene = new THREE.Scene();
         this.camDefaultPos = [0, 10, 10];
         this.camera = new THREE.PerspectiveCamera(45, this.canvasWidth / this.canvasHeight, 1, 100);
@@ -168,15 +169,31 @@ var Root = (function () {
     Root.prototype.destructor = function () {
     };
     /// Methods
+    //windowResize(skipRezoom = false) {
     Root.prototype.windowResize = function () {
-        this.canvasWidth = window.innerWidth;
-        this.canvasHeight = window.innerHeight;
+        this.canvasWidth = this.canvas.offsetWidth;
+        this.canvasHeight = this.canvas.offsetHeight;
+        //console.log("Width x Height: " + this.canvasWidth + "," + this.canvasHeight);
+        // Used instead when you just want full screen
+        //this.canvasWidth = window.innerWidth;
+        //this.canvasHeight = window.innerHeight; 
         this.renderer.setSize(this.canvasWidth, this.canvasHeight);
         if (this.camera != null) {
             this.camera.aspect = this.canvasWidth / this.canvasHeight;
             this.camera.updateProjectionMatrix();
         }
+        //if (!skipRezoom) {
+        //    if (this.resizeTO) clearTimeout(this.resizeTO);
+        //    this.resizeTO = setTimeout(function () {
+        //        root.resizeEnd();
+        //    }, 500);
+        //}
     };
+    //resizeEnd() {
+    //    console.log("resize end");
+    //    document.body.style.zoom = "1.0000001";
+    //    setTimeout(function () { document.body.style.zoom = "1"; root.windowResize(true); }, 50);
+    //}
     Root.prototype.animateScene = function () {
         this.objMgr.update();
         this.update();
@@ -250,7 +267,7 @@ function animateScene() {
     requestAnimationFrame(animateScene);
 }
 function testClick() {
-    alert("testing");
+    console.log("testing");
 }
 //interface ITriggerEvent<T> {
 //    on(handler: { (data?: T): void });

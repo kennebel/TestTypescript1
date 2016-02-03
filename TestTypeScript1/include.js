@@ -77,10 +77,12 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var TestObject = (function (_super) {
     __extends(TestObject, _super);
+    // Properties
+    //heightUpdater: TWEEN.Tween;
     // Construct / Destruct
-    function TestObject(root, startX) {
+    function TestObject(root, startX, startHeight) {
         _super.call(this, root);
-        var boxGeometry = new THREE.BoxGeometry(1, 0.1, 1);
+        var boxGeometry = new THREE.BoxGeometry(1, 1, 1);
         //var boxMaterials = [
         //    new THREE.MeshBasicMaterial({ color: 0xFF0000 }),
         //    new THREE.MeshBasicMaterial({ color: 0x00FF00 }),
@@ -98,12 +100,20 @@ var TestObject = (function (_super) {
         //    new THREE.MeshBasicMaterial({ color: 0xFF00FF })
         //];
         //var boxMaterial = new THREE.MeshFaceMaterial(boxMaterials);
-        var boxMaterial = new THREE.MeshBasicMaterial({ color: 0x0000FF });
+        var boxMaterial = new THREE.MeshBasicMaterial({ color: 0x0088FF });
         this.mesh = new THREE.Mesh(boxGeometry, boxMaterial);
         //this.mesh = new THREE.Mesh(boxGeometry);
         this.mesh.position.set(startX, 0.0, 0.0);
         this.addMe();
+        if (startHeight != undefined) {
+            this.setHeight(startHeight);
+        }
     }
+    // Methods
+    TestObject.prototype.setHeight = function (newHeight) {
+        this.mesh.scale.set(1, newHeight, 1);
+        this.mesh.position.setComponent(1, newHeight / 2);
+    };
     return TestObject;
 })(SimObject);
 /// <reference path="../DefinitelyTyped/three.d.ts" />
@@ -129,7 +139,7 @@ var ObjectManager = (function () {
     };
     ObjectManager.prototype.testInit = function () {
         for (var i = -5; i <= 5; i += 2) {
-            this.add(new TestObject(this.root, i));
+            this.add(new TestObject(this.root, i, i));
         }
     };
     ObjectManager.prototype.add = function (toAdd) {

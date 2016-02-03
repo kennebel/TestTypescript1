@@ -21,7 +21,7 @@ class ObjectManager {
 
     testInit() {
         for (var i = -5; i <= 5; i += 2) {
-            this.add(new TestObject(this.root, i));
+            this.add(new TestObject(this.root, i, i));
         }
     }
 

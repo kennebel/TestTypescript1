@@ -1,8 +1,10 @@
 ﻿/// <reference path="Root/Root.ts" />
 
 var root: Root;
+var settings: IRootOptions = { };
 window.onload = () => {
-    root = new Root();
+    root = new Root(settings);
+    root.testInit();
     animateScene();
 };
 

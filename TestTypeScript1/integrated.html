@@ -4,12 +4,12 @@
 <head>
     <meta charset="utf-8" />
     <style type="text/css">
-        #WebGLCanvas {
+        #scroll_holder {
             /* Set the background color of the HTML page to black */
             background-color: #FFFFFF;
             /* Hide oversized content. This prevents the scroll bars. */
             overflow: hidden;
-            height: 150px;
+            height: 250px;
         }
     </style>
     <title>Integrated 3D Testing</title>
@@ -19,9 +19,13 @@
     <script src="include.js"></script>
 </head>
 <body>
-    <div id="WebGLCanvas"></div>
+    <div id="scroll_holder"></div>
     <div>
         <button type="button" onclick="testClick();">Click Me</button>
     </div>
+    <script>
+        settings = { container: "scroll_holder", camPosition: { x: 0, y: 0, z: 10 } };
+        //settings = { container: "scroll_holder" };
+    </script>
 </body>
 </html>

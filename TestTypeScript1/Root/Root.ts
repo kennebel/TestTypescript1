@@ -1,11 +1,15 @@
-﻿/// <reference path="../DefinitelyTyped/three.d.ts" />
-/// <reference path="IRoot.ts" />
-/// <reference path="ObjectManager.ts" />
-/// <reference path="InputManager.ts" />
+﻿/// <reference path="Includes.ts" />
+
+interface IRootOptions {
+    container?: string;
+    fov?: number;
+    camPosition?: THREE.Vector3;
+    camIsPerspective?: boolean;
+}
 
 class Root implements IRoot {
     /// Properties
-    canvas: HTMLElement;
+    container: HTMLElement;
 
     renderer: THREE.WebGLRenderer;
     scene: THREE.Scene;
@@ -18,33 +22,52 @@ class Root implements IRoot {
     inpMgr: InputManager;
     keys: string[];
 
-    private camDefaultPos: number[];
+    private camDefaultPos: THREE.Vector3;
     private resizeTO: any;
 
     /// Construct / Destruct
     // Used as a base: http://www.johannes-raida.de/tutorials/three.js/tutorial05/tutorial05.htm
-    constructor() {
-        this.canvas = document.getElementById("WebGLCanvas");
+    constructor(options?: IRootOptions) {
+        options = this.setDefaults(options);
+
+        this.container = document.getElementById(options.container);
 
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); 
         this.renderer.setClearColor(0x000000, 0); 
 
         this.windowResize();
 
-        this.canvas.appendChild(this.renderer.domElement); 
+        this.container.appendChild(this.renderer.domElement); 
  
         this.scene = new THREE.Scene(); 
 
-        this.camDefaultPos = [0, 10, 10];
-        this.camera = new THREE.PerspectiveCamera(45, this.canvasWidth / this.canvasHeight, 1, 100);
+        this.camDefaultPos = options.camPosition;
+        if (options.camIsPerspective) {
+            this.camera = new THREE.PerspectiveCamera(options.fov, this.canvasWidth / this.canvasHeight, 1, 100);
+        }
+        else {
+            //this.camera = new THREE.OrthographicCamera(0.5 * this.canvasWidth / - 2, 0.5 * this.canvasWidth / 2, this.canvasHeight / 2, this.canvasHeight / - 2, 1, 100);
+        }
         this.resetCamera();
         this.scene.add(this.camera); 
 
         this.objMgr = new ObjectManager(this);
-        this.objMgr.testInit();
 
         this.keys = new Array();
         this.inpMgr = new InputManager(this);
+    }
+
+    private setDefaults(options: IRootOptions): IRootOptions {
+        if (options == undefined) {
+            options = {};
+        }
+
+        if (options.container == undefined || options.container.trim() == "") { options.container = "WebGLCanvas"; }
+        if (options.fov == undefined) { options.fov = 45; }
+        if (options.camPosition == undefined) { options.camPosition = new THREE.Vector3(0, 10, 10); }
+        if (options.camIsPerspective == undefined) { options.camIsPerspective = true; }
+
+        return options;
     }
 
     destructor() {
@@ -52,10 +75,9 @@ class Root implements IRoot {
     }
 
     /// Methods
-    //windowResize(skipRezoom = false) {
     windowResize() {
-        this.canvasWidth = this.canvas.offsetWidth;
-        this.canvasHeight = this.canvas.offsetHeight;
+        this.canvasWidth = this.container.offsetWidth;
+        this.canvasHeight = this.container.offsetHeight;
         //console.log("Width x Height: " + this.canvasWidth + "," + this.canvasHeight);
 
         // Used instead when you just want full screen
@@ -77,12 +99,6 @@ class Root implements IRoot {
         //}
     }
 
-    //resizeEnd() {
-    //    console.log("resize end");
-    //    document.body.style.zoom = "1.0000001";
-    //    setTimeout(function () { document.body.style.zoom = "1"; root.windowResize(true); }, 50);
-    //}
-
     animateScene() {
         this.objMgr.update();
         this.update();
@@ -90,7 +106,7 @@ class Root implements IRoot {
         this.renderScene();
     }
 
-    renderScene() {
+    private renderScene() {
         this.renderer.render(this.scene, this.camera);
     }
 
@@ -122,13 +138,12 @@ class Root implements IRoot {
         this.scene.remove(toRemove.mesh);
     }
 
-    /// Support
     resetCamera(): void {
-        this.camera.position.set(this.camDefaultPos[0], this.camDefaultPos[1], this.camDefaultPos[2]);
+        this.camera.position.set(this.camDefaultPos.x, this.camDefaultPos.y, this.camDefaultPos.z);
         this.camera.lookAt(new THREE.Vector3(0, 0, 0));
     }
 
-    update() {
+    private update() {
         var step: number = 0.1;
         if (this.keyActive("shift")) {
             step = 1;
@@ -146,5 +161,10 @@ class Root implements IRoot {
         else if (this.keyActive("down")) {
             this.camera.position.z += step;
         }
+    }
+
+    // Testing
+    testInit() {
+        this.objMgr.testInit();
     }
 }

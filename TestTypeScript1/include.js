@@ -53,6 +53,35 @@ var InputManager = (function () {
     return InputManager;
 })();
 /// <reference path="../Root/Includes.ts" />
+var ObjectManager = (function () {
+    // Construct / Destruct
+    function ObjectManager(newRoot) {
+        this.root = newRoot;
+        this.objects = new Array();
+    }
+    // Methods
+    ObjectManager.prototype.update = function () {
+        for (var i = 0; i < this.objects.length; i++) {
+            this.objects[i].update();
+        }
+    };
+    ObjectManager.prototype.testInit = function () {
+        for (var i = -5; i <= 5; i += 2) {
+            this.add(new TestObject(this.root, i, i));
+        }
+    };
+    ObjectManager.prototype.add = function (toAdd) {
+        this.objects.push(toAdd);
+    };
+    ObjectManager.prototype.remove = function (toRemove) {
+        var index = this.objects.indexOf(toRemove);
+        if (index != -1) {
+            this.objects.splice(index, 1);
+        }
+    };
+    return ObjectManager;
+})();
+/// <reference path="../Root/Includes.ts" />
 var SimObject = (function () {
     // Constuct / Destruct
     function SimObject(newRoot) {
@@ -124,65 +153,54 @@ var TestObject = (function (_super) {
 /// <reference path="../Root/ObjectManager.ts" />
 /// <reference path="../Objects/SimObject.ts" />
 /// <reference path="../Objects/TestObject.ts" />
-/// <reference path="../Root/Includes.ts" />
-var ObjectManager = (function () {
-    // Construct / Destruct
-    function ObjectManager(newRoot) {
-        this.root = newRoot;
-        this.objects = new Array();
-    }
-    // Methods
-    ObjectManager.prototype.update = function () {
-        for (var i = 0; i < this.objects.length; i++) {
-            this.objects[i].update();
-        }
-    };
-    ObjectManager.prototype.testInit = function () {
-        for (var i = -5; i <= 5; i += 2) {
-            this.add(new TestObject(this.root, i, i));
-        }
-    };
-    ObjectManager.prototype.add = function (toAdd) {
-        this.objects.push(toAdd);
-    };
-    ObjectManager.prototype.remove = function (toRemove) {
-        var index = this.objects.indexOf(toRemove);
-        if (index != -1) {
-            this.objects.splice(index, 1);
-        }
-    };
-    return ObjectManager;
-})();
-/// <reference path="../DefinitelyTyped/three.d.ts" />
-/// <reference path="IRoot.ts" />
-/// <reference path="ObjectManager.ts" />
-/// <reference path="InputManager.ts" />
+/// <reference path="Includes.ts" />
 var Root = (function () {
     /// Construct / Destruct
     // Used as a base: http://www.johannes-raida.de/tutorials/three.js/tutorial05/tutorial05.htm
-    function Root() {
-        this.canvas = document.getElementById("WebGLCanvas");
+    function Root(options) {
+        options = this.setDefaults(options);
+        this.container = document.getElementById(options.container);
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         this.renderer.setClearColor(0x000000, 0);
         this.windowResize();
-        this.canvas.appendChild(this.renderer.domElement);
+        this.container.appendChild(this.renderer.domElement);
         this.scene = new THREE.Scene();
-        this.camDefaultPos = [0, 10, 10];
-        this.camera = new THREE.PerspectiveCamera(45, this.canvasWidth / this.canvasHeight, 1, 100);
+        this.camDefaultPos = options.camPosition;
+        if (options.camIsPerspective) {
+            this.camera = new THREE.PerspectiveCamera(options.fov, this.canvasWidth / this.canvasHeight, 1, 100);
+        }
+        else {
+        }
         this.resetCamera();
         this.scene.add(this.camera);
         this.objMgr = new ObjectManager(this);
-        this.objMgr.testInit();
         this.keys = new Array();
         this.inpMgr = new InputManager(this);
     }
+    Root.prototype.setDefaults = function (options) {
+        if (options == undefined) {
+            options = {};
+        }
+        if (options.container == undefined || options.container.trim() == "") {
+            options.container = "WebGLCanvas";
+        }
+        if (options.fov == undefined) {
+            options.fov = 45;
+        }
+        if (options.camPosition == undefined) {
+            options.camPosition = new THREE.Vector3(0, 10, 10);
+        }
+        if (options.camIsPerspective == undefined) {
+            options.camIsPerspective = true;
+        }
+        return options;
+    };
     Root.prototype.destructor = function () {
     };
     /// Methods
-    //windowResize(skipRezoom = false) {
     Root.prototype.windowResize = function () {
-        this.canvasWidth = this.canvas.offsetWidth;
-        this.canvasHeight = this.canvas.offsetHeight;
+        this.canvasWidth = this.container.offsetWidth;
+        this.canvasHeight = this.container.offsetHeight;
         //console.log("Width x Height: " + this.canvasWidth + "," + this.canvasHeight);
         // Used instead when you just want full screen
         //this.canvasWidth = window.innerWidth;
@@ -199,11 +217,6 @@ var Root = (function () {
         //    }, 500);
         //}
     };
-    //resizeEnd() {
-    //    console.log("resize end");
-    //    document.body.style.zoom = "1.0000001";
-    //    setTimeout(function () { document.body.style.zoom = "1"; root.windowResize(true); }, 50);
-    //}
     Root.prototype.animateScene = function () {
         this.objMgr.update();
         this.update();
@@ -235,9 +248,8 @@ var Root = (function () {
         this.objMgr.remove(toRemove);
         this.scene.remove(toRemove.mesh);
     };
-    /// Support
     Root.prototype.resetCamera = function () {
-        this.camera.position.set(this.camDefaultPos[0], this.camDefaultPos[1], this.camDefaultPos[2]);
+        this.camera.position.set(this.camDefaultPos.x, this.camDefaultPos.y, this.camDefaultPos.z);
         this.camera.lookAt(new THREE.Vector3(0, 0, 0));
     };
     Root.prototype.update = function () {
@@ -259,12 +271,18 @@ var Root = (function () {
             this.camera.position.z += step;
         }
     };
+    // Testing
+    Root.prototype.testInit = function () {
+        this.objMgr.testInit();
+    };
     return Root;
 })();
 /// <reference path="Root/Root.ts" />
 var root;
+var settings = {};
 window.onload = function () {
-    root = new Root();
+    root = new Root(settings);
+    root.testInit();
     animateScene();
 };
 window.onresize = function (event) {

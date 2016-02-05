@@ -1,56 +1,154 @@
 /// <reference path="Includes.ts" />
-var InputManager = (function () {
-    function InputManager(newRoot) {
-        this.root = newRoot;
+var Root = (function () {
+    /// Construct / Destruct
+    // Used as a base: http://www.johannes-raida.de/tutorials/three.js/tutorial05/tutorial05.htm
+    function Root(options) {
+        this.options = this.setDefaults(options);
+        this.container = document.getElementById(this.options.container);
+        if (this.options.debugContainer != undefined) {
+            this.debugContainer = document.getElementById(this.options.debugContainer);
+        }
+        this.log("startup");
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        this.renderer.setClearColor(0x000000, 0);
+        this.windowResize();
+        this.container.appendChild(this.renderer.domElement);
+        this.scene = new THREE.Scene();
+        this.camDefaultPos = this.options.camPosition;
+        if (this.options.camIsPerspective) {
+            this.perspCamera = new THREE.PerspectiveCamera(this.options.fov, this.canvasWidth / this.canvasHeight, 1, 100);
+            this.camera = this.perspCamera;
+        }
+        else {
+            //this.orthoCamera = new THREE.OrthographicCamera(0.5 * this.canvasWidth / - 2, 0.5 * this.canvasWidth / 2, this.canvasHeight / 2, this.canvasHeight / - 2, 1, 12);
+            this.orthoCamera = new THREE.OrthographicCamera(0.5 * 40 / -2, 0.5 * 40 / 2, 12 / 2, 12 / -2, 1, 12);
+            this.camera = this.orthoCamera;
+        }
+        this.resetCamera();
+        this.scene.add(this.camera);
+        this.objMgr = new ObjectManager(this);
+        this.keys = new Array();
+        this.inpMgr = new InputManager(this);
     }
-    // Event Handlers
-    InputManager.prototype.keyPressed = function (event) {
-        //console.log(" Pressed: " + event.which);
-        var key = this.keyConvert(event);
-        if (this.root.keys.indexOf(key) == -1) {
-            this.root.keys.push(key);
-            this.root.keyDown(key);
+    Root.prototype.setDefaults = function (options) {
+        if (options == undefined) {
+            options = {};
+        }
+        if (options.container == undefined || options.container.trim() == "") {
+            options.container = "WebGLCanvas";
+        }
+        if (options.fov == undefined) {
+            options.fov = 45;
+        }
+        if (options.camPosition == undefined) {
+            options.camPosition = new THREE.Vector3(0, 10, 10);
+        }
+        if (options.camIsPerspective == undefined) {
+            options.camIsPerspective = true;
+        }
+        if (options.lockX == undefined) {
+            options.lockX = false;
+        }
+        if (options.lockY == undefined) {
+            options.lockY = false;
+        }
+        if (options.lockZ == undefined) {
+            options.lockZ = false;
+        }
+        return options;
+    };
+    Root.prototype.destructor = function () {
+    };
+    /// Methods
+    Root.prototype.log = function (message) {
+        if (this.debugContainer != undefined) {
+            this.debugContainer.innerText = message;
         }
     };
-    InputManager.prototype.keyReleased = function (event) {
-        //console.log("Released: " + event.which);
-        var key = this.keyConvert(event);
-        var index = this.root.keys.indexOf(key);
-        if (index != -1) {
-            this.root.keys.splice(index, 1);
-            this.root.keyUp(key);
+    Root.prototype.windowResize = function () {
+        this.canvasWidth = this.container.offsetWidth;
+        this.canvasHeight = this.container.offsetHeight;
+        // Used instead when you just want full screen
+        //this.canvasWidth = window.innerWidth;
+        //this.canvasHeight = window.innerHeight; 
+        this.renderer.setSize(this.canvasWidth, this.canvasHeight);
+        if (this.camera != null) {
+            if (this.camera == this.perspCamera) {
+                this.perspCamera.aspect = this.canvasWidth / this.canvasHeight;
+                this.perspCamera.updateProjectionMatrix();
+            }
+            else {
+                this.orthoCamera.left = -0.5 * this.canvasWidth / 2;
+                this.orthoCamera.right = 0.5 * this.canvasWidth / 2;
+                this.orthoCamera.top = this.canvasHeight / 2;
+                this.orthoCamera.bottom = -this.canvasHeight / 2;
+                this.orthoCamera.updateProjectionMatrix();
+            }
         }
     };
-    InputManager.prototype.keyConvert = function (event) {
-        switch (event.which) {
-            case 16:
-                return "shift";
-                break;
-            case 17:
-                return "control";
-                break;
-            case 18:
-                return "alt";
-                break;
-            case 37:
-                return "left";
-                break;
-            case 38:
-                return "up";
-                break;
-            case 39:
-                return "right";
-                break;
-            case 40:
-                return "down";
-                break;
-            case 82:
-                return "r";
+    Root.prototype.animateScene = function () {
+        this.objMgr.update();
+        this.update();
+        this.renderScene();
+    };
+    Root.prototype.renderScene = function () {
+        this.renderer.render(this.scene, this.camera);
+    };
+    Root.prototype.keyActive = function (checkFor) {
+        if (this.keys.indexOf(checkFor) > -1) {
+            return true;
+        }
+        return false;
+    };
+    Root.prototype.keyDown = function (pressed) {
+        switch (pressed) {
+            case "r":
+                this.resetCamera();
                 break;
         }
-        return "";
     };
-    return InputManager;
+    Root.prototype.keyUp = function (pressed) {
+    };
+    Root.prototype.addSimObject = function (toAdd) {
+        this.objMgr.add(toAdd);
+        this.scene.add(toAdd.mesh);
+    };
+    Root.prototype.removeSimObject = function (toRemove) {
+        this.objMgr.remove(toRemove);
+        this.scene.remove(toRemove.mesh);
+    };
+    Root.prototype.resetCamera = function () {
+        this.camera.position.set(this.camDefaultPos.x, this.camDefaultPos.y, this.camDefaultPos.z);
+        this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+    };
+    Root.prototype.update = function () {
+        var step = 0.1;
+        if (this.keyActive("shift")) {
+            step = 1;
+        }
+        if (!this.options.lockX) {
+            if (this.keyActive("left")) {
+                this.camera.position.x -= step;
+                ;
+            }
+            else if (this.keyActive("right")) {
+                this.camera.position.x += step;
+            }
+        }
+        if (!this.options.lockZ) {
+            if (this.keyActive("up")) {
+                this.camera.position.z -= step;
+            }
+            else if (this.keyActive("down")) {
+                this.camera.position.z += step;
+            }
+        }
+    };
+    // Testing
+    Root.prototype.testInit = function () {
+        this.objMgr.testInit();
+    };
+    return Root;
 })();
 /// <reference path="../Root/Includes.ts" />
 var ObjectManager = (function () {
@@ -154,128 +252,58 @@ var TestObject = (function (_super) {
 /// <reference path="../Objects/SimObject.ts" />
 /// <reference path="../Objects/TestObject.ts" />
 /// <reference path="Includes.ts" />
-var Root = (function () {
-    /// Construct / Destruct
-    // Used as a base: http://www.johannes-raida.de/tutorials/three.js/tutorial05/tutorial05.htm
-    function Root(options) {
-        options = this.setDefaults(options);
-        this.container = document.getElementById(options.container);
-        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        this.renderer.setClearColor(0x000000, 0);
-        this.windowResize();
-        this.container.appendChild(this.renderer.domElement);
-        this.scene = new THREE.Scene();
-        this.camDefaultPos = options.camPosition;
-        if (options.camIsPerspective) {
-            this.camera = new THREE.PerspectiveCamera(options.fov, this.canvasWidth / this.canvasHeight, 1, 100);
-        }
-        else {
-        }
-        this.resetCamera();
-        this.scene.add(this.camera);
-        this.objMgr = new ObjectManager(this);
-        this.keys = new Array();
-        this.inpMgr = new InputManager(this);
+var InputManager = (function () {
+    function InputManager(newRoot) {
+        this.root = newRoot;
     }
-    Root.prototype.setDefaults = function (options) {
-        if (options == undefined) {
-            options = {};
+    // Event Handlers
+    InputManager.prototype.keyPressed = function (event) {
+        //console.log(" Pressed: " + event.which);
+        var key = this.keyConvert(event);
+        if (this.root.keys.indexOf(key) == -1) {
+            this.root.keys.push(key);
+            this.root.keyDown(key);
         }
-        if (options.container == undefined || options.container.trim() == "") {
-            options.container = "WebGLCanvas";
-        }
-        if (options.fov == undefined) {
-            options.fov = 45;
-        }
-        if (options.camPosition == undefined) {
-            options.camPosition = new THREE.Vector3(0, 10, 10);
-        }
-        if (options.camIsPerspective == undefined) {
-            options.camIsPerspective = true;
-        }
-        return options;
     };
-    Root.prototype.destructor = function () {
-    };
-    /// Methods
-    Root.prototype.windowResize = function () {
-        this.canvasWidth = this.container.offsetWidth;
-        this.canvasHeight = this.container.offsetHeight;
-        //console.log("Width x Height: " + this.canvasWidth + "," + this.canvasHeight);
-        // Used instead when you just want full screen
-        //this.canvasWidth = window.innerWidth;
-        //this.canvasHeight = window.innerHeight; 
-        this.renderer.setSize(this.canvasWidth, this.canvasHeight);
-        if (this.camera != null) {
-            this.camera.aspect = this.canvasWidth / this.canvasHeight;
-            this.camera.updateProjectionMatrix();
+    InputManager.prototype.keyReleased = function (event) {
+        //console.log("Released: " + event.which);
+        var key = this.keyConvert(event);
+        var index = this.root.keys.indexOf(key);
+        if (index != -1) {
+            this.root.keys.splice(index, 1);
+            this.root.keyUp(key);
         }
-        //if (!skipRezoom) {
-        //    if (this.resizeTO) clearTimeout(this.resizeTO);
-        //    this.resizeTO = setTimeout(function () {
-        //        root.resizeEnd();
-        //    }, 500);
-        //}
     };
-    Root.prototype.animateScene = function () {
-        this.objMgr.update();
-        this.update();
-        this.renderScene();
-    };
-    Root.prototype.renderScene = function () {
-        this.renderer.render(this.scene, this.camera);
-    };
-    Root.prototype.keyActive = function (checkFor) {
-        if (this.keys.indexOf(checkFor) > -1) {
-            return true;
-        }
-        return false;
-    };
-    Root.prototype.keyDown = function (pressed) {
-        switch (pressed) {
-            case "r":
-                this.resetCamera();
+    InputManager.prototype.keyConvert = function (event) {
+        switch (event.which) {
+            case 16:
+                return "shift";
+                break;
+            case 17:
+                return "control";
+                break;
+            case 18:
+                return "alt";
+                break;
+            case 37:
+                return "left";
+                break;
+            case 38:
+                return "up";
+                break;
+            case 39:
+                return "right";
+                break;
+            case 40:
+                return "down";
+                break;
+            case 82:
+                return "r";
                 break;
         }
+        return "";
     };
-    Root.prototype.keyUp = function (pressed) {
-    };
-    Root.prototype.addSimObject = function (toAdd) {
-        this.objMgr.add(toAdd);
-        this.scene.add(toAdd.mesh);
-    };
-    Root.prototype.removeSimObject = function (toRemove) {
-        this.objMgr.remove(toRemove);
-        this.scene.remove(toRemove.mesh);
-    };
-    Root.prototype.resetCamera = function () {
-        this.camera.position.set(this.camDefaultPos.x, this.camDefaultPos.y, this.camDefaultPos.z);
-        this.camera.lookAt(new THREE.Vector3(0, 0, 0));
-    };
-    Root.prototype.update = function () {
-        var step = 0.1;
-        if (this.keyActive("shift")) {
-            step = 1;
-        }
-        if (this.keyActive("left")) {
-            this.camera.position.x -= step;
-            ;
-        }
-        else if (this.keyActive("right")) {
-            this.camera.position.x += step;
-        }
-        if (this.keyActive("up")) {
-            this.camera.position.z -= step;
-        }
-        else if (this.keyActive("down")) {
-            this.camera.position.z += step;
-        }
-    };
-    // Testing
-    Root.prototype.testInit = function () {
-        this.objMgr.testInit();
-    };
-    return Root;
+    return InputManager;
 })();
 /// <reference path="Root/Root.ts" />
 var root;

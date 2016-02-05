@@ -23,8 +23,17 @@
     <div>
         <button type="button" onclick="testClick();">Click Me</button>
     </div>
+    <div>
+        <p id="debug"></p>
+    </div>
     <script>
-        settings = { container: "scroll_holder", camPosition: { x: 0, y: 0, z: 10 } };
+        settings = {
+            container: "scroll_holder",
+            camPosition: { x: 0, y: 0, z: 10 },
+            camIsPerspective: false,
+            lockZ: true,
+            debugContainer: "debug"
+        };
         //settings = { container: "scroll_holder" };
     </script>
 </body>

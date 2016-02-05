@@ -5,6 +5,8 @@ class SimObject {
     root: IRoot;
     mesh: THREE.Mesh;
 
+    IDBCursor: number;
+
     // Constuct / Destruct
     constructor(newRoot: IRoot) {
         this.root = newRoot;

@@ -2,18 +2,29 @@
 
 interface IRootOptions {
     container?: string;
+    debugContainer?: string;
+
     fov?: number;
     camPosition?: THREE.Vector3;
     camIsPerspective?: boolean;
+
+    lockX?: boolean;
+    lockY?: boolean;
+    lockZ?: boolean;
 }
 
 class Root implements IRoot {
     /// Properties
     container: HTMLElement;
+    debugContainer: HTMLElement;
 
     renderer: THREE.WebGLRenderer;
     scene: THREE.Scene;
-    camera: THREE.PerspectiveCamera;
+    camera: THREE.Camera;
+    perspCamera: THREE.PerspectiveCamera;
+    orthoCamera: THREE.OrthographicCamera;
+
+    options: IRootOptions;
 
     canvasWidth: number;
     canvasHeight: number;
@@ -23,14 +34,18 @@ class Root implements IRoot {
     keys: string[];
 
     private camDefaultPos: THREE.Vector3;
-    private resizeTO: any;
 
     /// Construct / Destruct
     // Used as a base: http://www.johannes-raida.de/tutorials/three.js/tutorial05/tutorial05.htm
     constructor(options?: IRootOptions) {
-        options = this.setDefaults(options);
+        this.options = this.setDefaults(options);
 
-        this.container = document.getElementById(options.container);
+        this.container = document.getElementById(this.options.container);
+        if (this.options.debugContainer != undefined) {
+            this.debugContainer = document.getElementById(this.options.debugContainer);
+        }
+
+        this.log("startup");
 
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); 
         this.renderer.setClearColor(0x000000, 0); 
@@ -41,12 +56,15 @@ class Root implements IRoot {
  
         this.scene = new THREE.Scene(); 
 
-        this.camDefaultPos = options.camPosition;
-        if (options.camIsPerspective) {
-            this.camera = new THREE.PerspectiveCamera(options.fov, this.canvasWidth / this.canvasHeight, 1, 100);
+        this.camDefaultPos = this.options.camPosition;
+        if (this.options.camIsPerspective) {
+            this.perspCamera = new THREE.PerspectiveCamera(this.options.fov, this.canvasWidth / this.canvasHeight, 1, 100);
+            this.camera = this.perspCamera;
         }
         else {
-            //this.camera = new THREE.OrthographicCamera(0.5 * this.canvasWidth / - 2, 0.5 * this.canvasWidth / 2, this.canvasHeight / 2, this.canvasHeight / - 2, 1, 100);
+            //this.orthoCamera = new THREE.OrthographicCamera(0.5 * this.canvasWidth / - 2, 0.5 * this.canvasWidth / 2, this.canvasHeight / 2, this.canvasHeight / - 2, 1, 12);
+            this.orthoCamera = new THREE.OrthographicCamera(0.5 * 40 / - 2, 0.5 * 40 / 2, 12 / 2, 12 / - 2, 1, 12);
+            this.camera = this.orthoCamera;
         }
         this.resetCamera();
         this.scene.add(this.camera); 
@@ -67,6 +85,10 @@ class Root implements IRoot {
         if (options.camPosition == undefined) { options.camPosition = new THREE.Vector3(0, 10, 10); }
         if (options.camIsPerspective == undefined) { options.camIsPerspective = true; }
 
+        if (options.lockX == undefined) { options.lockX = false; }
+        if (options.lockY == undefined) { options.lockY = false; }
+        if (options.lockZ == undefined) { options.lockZ = false; }
+
         return options;
     }
 
@@ -75,10 +97,15 @@ class Root implements IRoot {
     }
 
     /// Methods
+    log(message: string) {
+        if (this.debugContainer != undefined) {
+            this.debugContainer.innerText = message;
+        }
+    }
+
     windowResize() {
         this.canvasWidth = this.container.offsetWidth;
         this.canvasHeight = this.container.offsetHeight;
-        //console.log("Width x Height: " + this.canvasWidth + "," + this.canvasHeight);
 
         // Used instead when you just want full screen
         //this.canvasWidth = window.innerWidth;
@@ -87,16 +114,18 @@ class Root implements IRoot {
         this.renderer.setSize(this.canvasWidth, this.canvasHeight); 
 
         if (this.camera != null) {
-            this.camera.aspect = this.canvasWidth / this.canvasHeight;
-            this.camera.updateProjectionMatrix();
+            if (this.camera == this.perspCamera) {
+                this.perspCamera.aspect = this.canvasWidth / this.canvasHeight;
+                this.perspCamera.updateProjectionMatrix();
+            }
+            else { // orthoCamera
+                this.orthoCamera.left = - 0.5 * this.canvasWidth / 2;
+                this.orthoCamera.right = 0.5 * this.canvasWidth / 2;
+                this.orthoCamera.top = this.canvasHeight / 2;
+                this.orthoCamera.bottom = - this.canvasHeight / 2;
+                this.orthoCamera.updateProjectionMatrix();
+            }
         }
-
-        //if (!skipRezoom) {
-        //    if (this.resizeTO) clearTimeout(this.resizeTO);
-        //    this.resizeTO = setTimeout(function () {
-        //        root.resizeEnd();
-        //    }, 500);
-        //}
     }
 
     animateScene() {
@@ -149,17 +178,21 @@ class Root implements IRoot {
             step = 1;
         }
 
-        if (this.keyActive("left")) {
-            this.camera.position.x -= step;;
+        if (!this.options.lockX) {
+            if (this.keyActive("left")) {
+                this.camera.position.x -= step;;
+            }
+            else if (this.keyActive("right")) {
+                this.camera.position.x += step;
+            }
         }
-        else if (this.keyActive("right")) {
-            this.camera.position.x += step;
-        }
-        if (this.keyActive("up")) {
-            this.camera.position.z -= step;
-        }
-        else if (this.keyActive("down")) {
-            this.camera.position.z += step;
+        if (!this.options.lockZ) {
+            if (this.keyActive("up")) {
+                this.camera.position.z -= step;
+            }
+            else if (this.keyActive("down")) {
+                this.camera.position.z += step;
+            }
         }
     }
 
